@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -158,6 +158,18 @@ vim.opt.scrolloff = 10
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+
+vim.keymap.set('n', '<leader>x', function()
+  local ft = vim.bo.filetype
+  vim.cmd 'redraw!'
+  if ft == 'python' then
+    vim.cmd '!python3 %'
+  elseif ft == 'rust' then
+    vim.cmd '!cargo run'
+  else
+    print 'No run command for this filetype'
+  end
+end, { noremap = true, silent = true })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
@@ -239,6 +251,7 @@ require('lazy').setup({
     },
     init = function()
       vim.cmd.colorscheme 'ashen'
+      -- vim.cmd.colorscheme 'lucy'
     end,
   },
   -- NOTE: Plugins can also be added by using a table,
@@ -982,6 +995,59 @@ require('lazy').setup({
     },
   },
 })
+
+-- iso no keyboard :ToggleCustomKeymaps
+
+-- Toggle flag
+vim.g.custom_key_remaps_enabled = true
+
+-- Function to apply key mappings if enabled
+local function apply_custom_keymaps()
+  if vim.g.custom_key_remaps_enabled then
+    vim.api.nvim_set_keymap('i', '¤', '$', { noremap = true })
+    vim.api.nvim_set_keymap('i', 'å', '{', { noremap = true })
+    vim.api.nvim_set_keymap('i', 'æ', '}', { noremap = true })
+    vim.api.nvim_set_keymap('i', 'Å', '[', { noremap = true })
+    vim.api.nvim_set_keymap('i', 'Æ', ']', { noremap = true })
+    vim.api.nvim_set_keymap('i', 'ø', ':', { noremap = true })
+    vim.api.nvim_set_keymap('i', 'Ø', ';', { noremap = true })
+
+    vim.api.nvim_set_keymap('n', '¤', '$', { noremap = true })
+    vim.api.nvim_set_keymap('n', 'å', '{', { noremap = true })
+    vim.api.nvim_set_keymap('n', 'æ', '}', { noremap = true })
+    vim.api.nvim_set_keymap('n', 'Å', '[', { noremap = true })
+    vim.api.nvim_set_keymap('n', 'Æ', ']', { noremap = true })
+    vim.api.nvim_set_keymap('n', 'ø', ':', { noremap = true })
+    vim.api.nvim_set_keymap('n', 'Ø', ';', { noremap = true })
+  else
+    -- Clear mappings
+    vim.api.nvim_del_keymap('i', '¤')
+    vim.api.nvim_del_keymap('i', 'å')
+    vim.api.nvim_del_keymap('i', 'æ')
+    vim.api.nvim_del_keymap('i', 'Å')
+    vim.api.nvim_del_keymap('i', 'Æ')
+    vim.api.nvim_del_keymap('i', 'ø')
+    vim.api.nvim_del_keymap('i', 'Ø')
+
+    vim.api.nvim_del_keymap('n', '¤')
+    vim.api.nvim_del_keymap('n', 'å')
+    vim.api.nvim_del_keymap('n', 'æ')
+    vim.api.nvim_del_keymap('n', 'Å')
+    vim.api.nvim_del_keymap('n', 'Æ')
+    vim.api.nvim_del_keymap('n', 'ø')
+    vim.api.nvim_del_keymap('n', 'Ø')
+  end
+end
+
+-- Apply key mappings on startup
+apply_custom_keymaps()
+
+-- Command to toggle mappings on the fly
+vim.api.nvim_create_user_command('ToggleCustomKeymaps', function()
+  vim.g.custom_key_remaps_enabled = not vim.g.custom_key_remaps_enabled
+  apply_custom_keymaps()
+  print('Custom key mappings ' .. (vim.g.custom_key_remaps_enabled and 'enabled' or 'disabled'))
+end, {})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
