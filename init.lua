@@ -358,7 +358,7 @@ require('lazy').setup({
         vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
         vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
         vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-        vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+        -- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
         vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
         vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
         vim.keymap.set('n', '<leader>wl', function()
@@ -746,6 +746,14 @@ vim.keymap.set('v', '¨', '<Esc>', { noremap = true })
 vim.keymap.set('n', '¨', '<Esc>', { noremap = true })
 
 vim.keymap.set('n', '<leader>t', ':Neotree toggle<CR>', { noremap = true, silent = true })
+
+-- Window navigation with Ctrl + hjkl
+-- Map Ctrl+h/j/k/l to navigate between windows
+-- vim.keymap.set('n', '<C-h>', '<C-w>h', { noremap = true, silent = true })
+-- vim.keymap.set('n', '<C-j>', '<C-w>j', { noremap = true, silent = true })
+-- vim.keymap.set('n', '<C-k>', '<C-w>k', { noremap = true, silent = true })
+-- vim.keymap.set('n', '<C-l>', '<C-w>l', { noremap = true, silent = true })
+--
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
