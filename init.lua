@@ -18,6 +18,10 @@ vim.opt.number = true
 --  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
 
+-- tabs
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
@@ -59,7 +63,8 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '  ', trail = '·', nbsp = '␣' }
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -154,7 +159,8 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  -- NOTE: enable sleuth if you want whitespaces instead of tabs for some reason
+  -- 'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   {
     -- 'ficcdaf/ashen.nvim',
     'rebelot/kanagawa.nvim',
@@ -747,13 +753,12 @@ vim.keymap.set('n', '¨', '<Esc>', { noremap = true })
 
 vim.keymap.set('n', '<leader>t', ':Neotree toggle<CR>', { noremap = true, silent = true })
 
--- Window navigation with Ctrl + hjkl
--- Map Ctrl+h/j/k/l to navigate between windows
--- vim.keymap.set('n', '<C-h>', '<C-w>h', { noremap = true, silent = true })
--- vim.keymap.set('n', '<C-j>', '<C-w>j', { noremap = true, silent = true })
--- vim.keymap.set('n', '<C-k>', '<C-w>k', { noremap = true, silent = true })
--- vim.keymap.set('n', '<C-l>', '<C-w>l', { noremap = true, silent = true })
---
-
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+-- vim.keymap.set('n', 'K', vim.lsp.buf.hover, { buffer = bufnr })
+vim.keymap.set('n', 'K', function()
+  vim.lsp.buf.hover()
+  -- Wait a tiny bit for the hover window to open, then set the mapping
+  vim.defer_fn(function()
+    local hover_buf = vim.api.nvim_get_current_buf()
+    vim.keymap.set("n", "<Esc>", "<cmd>close<cr>", { buffer = hover_buf })
+  end, 10)
+end, { buffer = bufnr })
