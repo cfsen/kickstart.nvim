@@ -3,10 +3,7 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-
 vim.g.have_nerd_font = true -- Set to true if you have a Nerd Font installed and selected in the terminal
-
--- [[ Setting options ]] See `:help vim.opt`. For more options, you can see `:help option-list`
 
 vim.opt.number = true -- Make line numbers default
 vim.opt.relativenumber = true
@@ -14,9 +11,9 @@ vim.opt.relativenumber = true
 vim.opt.tabstop = 4 -- tabs
 vim.opt.shiftwidth = 4
 
-vim.opt.mouse = 'a' -- Enable mouse mode, can be useful for resizing splits for example!
+vim.opt.mouse = 'a'
 
-vim.opt.showmode = false -- Don't show the mode, since it's already in the status line
+vim.opt.showmode = false
 
 vim.schedule(function()
 	vim.opt.clipboard = 'unnamedplus' --  Remove this option if you want your OS clipboard to remain independent. See `:help 'clipboard'`
@@ -84,7 +81,6 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
@@ -98,9 +94,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 	end,
 })
 
--- [[ Install `lazy.nvim` plugin manager ]]
---    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
+-- :Lazy | `:help lazy.nvim.txt` | https://github.com/folke/lazy.nvim
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+---@diagnostic disable-next-line: undefined-field
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
 	local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
@@ -110,33 +106,30 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- [[ Configure and install plugins ]]
 --
---  To check the current status of your plugins, run
---    :Lazy
+-- plugins
 --
---  You can press `?` in this menu for help. Use `:q` to close the window
---
---  To update plugins you can run
---    :Lazy update
---
--- NOTE: Here is where you install your plugins.
+
 require('lazy').setup({
-	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-	-- NOTE: enable sleuth if you want whitespaces instead of tabs for some reason
-	-- 'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 	{
 		'rebelot/kanagawa.nvim',
 		lazy = false,
 		priority = 1000,
-		-- configuration is optional!
 		opts = {
-			-- your settings here
 		},
 		init = function()
-			-- vim.cmd.colorscheme 'ashen'
 			vim.cmd.colorscheme 'kanagawa'
-			-- vim.cmd.colorscheme 'lucy'
+		end,
+	},
+	{ -- zen writing
+		'junegunn/goyo.vim',
+		cmd = 'Goyo',
+		config = function()
+			vim.opt_local.wrap = true
+			vim.opt_local.linebreak = true
+			vim.g.goyo_width = 80
+			vim.g.goyo_height = 85
+			vim.g.goyo_linenr = 0
 		end,
 	},
 	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
@@ -341,18 +334,90 @@ require('lazy').setup({
 			})
 
 			-- Setup each language server
+			-- Go
+			lspconfig.gopls.setup({
+				settings = {
+					gopls = {
+						analyses = {
+							unusedparams = true,
+						},
+						staticcheck = true,
+						gofumpt = true,
+					},
+				},
+			})
+			-- C#
+			local mason_bin = vim.fn.stdpath("data") .. "/mason/bin/OmniSharp"
+
+			lspconfig.omnisharp.setup {
+				cmd = { mason_bin },
+				capabilities = capabilities,
+				on_attach = function(client, bufnr)
+					vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
+					local opts = { buffer = bufnr }
+					vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+					vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+					vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+					vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+					vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+					vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+				end,
+				settings = {
+					FormattingOptions = {
+						EnableEditorConfigSupport = false,
+						OrganizeImports = false,
+						UseTabs = true,
+						SpacingAfterMethodDeclarationName = false,
+						SpaceWithinMethodDeclarationParenthesis = false,
+						SpaceBetweenEmptyMethodDeclarationParentheses = false,
+						SpaceAfterMethodCallName = false,
+						SpaceWithinMethodCallParentheses = false,
+						SpaceBetweenEmptyMethodCallParentheses = false,
+						SpaceAfterControlFlowStatementKeyword = false,
+					},
+					RoslynExtensionsOptions = {
+						enableAnalyzersSupport = true,
+						enableImportCompletion = true,
+						-- OrganizeImportsOnFormat = true,
+						documentAnalysisTimeoutMs = 30000,
+						enableDecompilationSupport = true,
+						diagnosticWorkersThreadCount = 8,
+						inlayHintsOptions = {
+							enableForParameters = true,
+							forLiteraParameters = true,
+							forIndexerParameters = true,
+							forObjectCreationParameters = true,
+							suppressForParametersThatDifferOnlyBySuffix = false,
+							suppressForParametersThatMatchMethodIntent = false,
+							suppressForParametersThatMatchArgumentName = false,
+							enableForTypes = true,
+							forImplicitVariableTypes = true,
+							forLambdaParameterTypes = true,
+							forImplicitObjectCreation = true
+						},
+					},
+					Sdk = { IncludePrereleases = true },
+					completion = {
+						keyword_length = 1
+					},
+				}
+			}
 
 			-- Rust
 			lspconfig.rust_analyzer.setup {
 				capabilities = capabilities,
 				settings = {
 					['rust-analyzer'] = {
-						checkOnSave = {
-							command = 'clippy',
-						},
+						-- checkOnSave = {
+						-- 	command = 'clippy',
+						-- },
+						checkOnSave = false,
 						-- avoid locks on windows
 						cargo = {
 							targetDir = 'target/analyzer',
+						},
+						diagnostics = {
+							disabled = { "inactive-code", },
 						},
 					},
 				},
@@ -557,7 +622,7 @@ require('lazy').setup({
 		main = 'nvim-treesitter.configs', -- Sets main module to use for opts
 		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 		opts = {
-			ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+			ensure_installed = { 'bash', 'c', 'c_sharp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
 			-- Autoinstall languages that are not installed
 			auto_install = true,
 			highlight = {
